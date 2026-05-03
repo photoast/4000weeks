@@ -9,16 +9,21 @@ interface CountdownProps {
 
 // 1. 함수 정의 부분에서 birthdate 인자 타입을 명시적으로 추가했습니다.
 function getTimeUntilEndOfWeek(birthdate: string) {
-  const birth = new Date(`${birthdate}T00:00:00+09:00`);
+  // birthdate는 여기서는 사용하지 않아도 되지만, 
+  // 인터페이스 유지를 위해 남겨두거나 생략 가능합니다.
   const now = new Date();
   
-  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const elapsed = now.getTime() - birth.getTime();
+  // 1. 현재 한국 시간 기준으로 '이번 주 일요일 자정(월요일 00:00:00)' 계산
+  const target = new Date(now);
+  const day = now.getDay(); // 0(일) ~ 6(토)
   
-  const currentWeek = Math.floor(elapsed / msPerWeek);
-  const endOfThisWeek = new Date(birth.getTime() + (currentWeek + 1) * msPerWeek);
-  const remaining = endOfThisWeek.getTime() - now.getTime();
+  // 오늘이 일요일(0)이면 1일 뒤, 월요일(1)이면 7일 뒤가 다음 월요일
+  const daysUntilNextMonday = day === 0 ? 1 : 8 - day;
+  
+  target.setDate(now.getDate() + daysUntilNextMonday);
+  target.setHours(0, 0, 0, 0); // 월요일 00:00:00 고정
 
+  const remaining = target.getTime() - now.getTime();
   const safeRemaining = Math.max(0, remaining);
 
   const days = Math.floor(safeRemaining / (1000 * 60 * 60 * 24));
@@ -28,7 +33,6 @@ function getTimeUntilEndOfWeek(birthdate: string) {
 
   return { days, hours, minutes, seconds };
 }
-
 function TickerDigit({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center min-w-[36px]">
