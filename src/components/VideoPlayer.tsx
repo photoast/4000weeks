@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
   onEnd: () => void;
 }
 
 export default function VideoPlayer({ onEnd }: VideoPlayerProps) {
-  const [showUnmute, setShowUnmute] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false); // 재생 시작 여부
   const calledRef = useRef(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -18,68 +18,80 @@ export default function VideoPlayer({ onEnd }: VideoPlayerProps) {
     onEnd();
   }, [onEnd]);
 
-  const handleUnmute = () => {
-    setShowUnmute(false);
+  // 버튼 클릭 시 호출되는 함수: 영상 재생 + 소리 켜기
+  const handleStart = () => {
+    setIsPlaying(true);
     if (iframeRef.current) {
-      iframeRef.current.contentWindow?.postMessage(
-        JSON.stringify({ event: "command", func: "unMute" }),
-        "*"
-      );
+      const contentWindow = iframeRef.current.contentWindow;
+      // 유튜브 IFrame API 커맨드 전송
+      contentWindow?.postMessage(JSON.stringify({ event: "command", func: "unMute" }), "*");
+      contentWindow?.postMessage(JSON.stringify({ event: "command", func: "playVideo" }), "*");
     }
   };
 
   useEffect(() => {
-    const timer = setTimeout(fireEnd, 14000);
-    return () => clearTimeout(timer);
-  }, [fireEnd]);
+    // 실제 재생 버튼을 누른 시점부터 14초 카운트다운 시작
+    if (isPlaying) {
+      const timer = setTimeout(fireEnd, 13000);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlaying, fireEnd]);
 
   return (
-    <div className="h-full w-full bg-black flex items-center justify-center relative">
+    <div className="h-dvh w-full bg-black flex items-center justify-center relative overflow-hidden">
       <div className="w-full h-full max-w-[500px] mx-auto relative">
         <iframe
           ref={iframeRef}
-          src="https://www.youtube.com/embed/9ltA6xvDscE?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=0&playsinline=1&enablejsapi=1&origin=*"
-          className="absolute inset-0 w-full h-full"
+          // autoplay=0으로 설정하여 대기 상태로 로드, enablejsapi=1 필수
+          src="https://www.youtube.com/embed/9ltA6xvDscE?autoplay=0&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=0&playsinline=1&enablejsapi=1&origin=*"
+          className="absolute inset-0 w-full h-full pointer-events-none"
           allow="autoplay; encrypted-media"
-          allowFullScreen
         />
       </div>
 
-      {showUnmute && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          onClick={handleUnmute}
-          className="absolute inset-0 flex items-center justify-center z-10 bg-black/50 backdrop-blur-sm"
-        >
-          <div className="flex flex-col items-center gap-5">
-            <motion.div
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-24 h-24 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-md bg-white/5"
+      <AnimatePresence>
+        {!isPlaying && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="absolute inset-0 flex items-center justify-center z-10 bg-black"
+          >
+            <motion.button
+              onClick={handleStart}
+              className="flex flex-col items-center gap-6 group"
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-              </svg>
-            </motion.div>
-            <span className="text-white/60 text-[13px] tracking-[0.2em]">
-              소리와 함께 시작하기
-            </span>
-          </div>
-        </motion.button>
-      )}
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="w-24 h-24 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-md bg-white/5 group-hover:bg-white/10 group-active:scale-95 transition-all"
+              >
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="white" className="ml-1.5">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              </motion.div>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-white/80 text-[14px] font-bold tracking-[0.2em]">
+                  인생 시계 시작하기
+                </span>
+                <span className="text-white/30 text-[11px] tracking-tight">
+                  소리와 함께 웅장하게 시작됩니다
+                </span>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* 재생 중일 때만 나타나는 건너뛰기 버튼 */}
       <motion.button
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3 }}
+        animate={{ opacity: isPlaying ? 1 : 0 }}
+        transition={{ delay: 2 }}
         onClick={fireEnd}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-white/25 text-[12px] tracking-[0.15em] hover:text-white/50 transition-colors py-2 px-4"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 text-white/20 text-[10px] tracking-[0.3em] font-black hover:text-white/50 transition-colors py-2 px-6 border border-white/5 rounded-full uppercase"
       >
-        건너뛰기
+        Skip
       </motion.button>
     </div>
   );
