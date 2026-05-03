@@ -29,36 +29,8 @@ export default function VideoPlayer({ onEnd }: VideoPlayerProps) {
   };
 
   useEffect(() => {
-    // YouTube iframe API: listen for state changes
-    const handler = (e: MessageEvent) => {
-      if (e.origin !== "https://www.youtube.com") return;
-      try {
-        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
-        // state 0 = ended
-        if (data.event === "onStateChange" && data.info === 0) {
-          fireEnd();
-        }
-      } catch {}
-    };
-    window.addEventListener("message", handler);
-
-    // Tell YouTube iframe to send us events once it loads
-    const initListener = () => {
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify({ event: "listening" }),
-        "*"
-      );
-    };
-    const initTimer = setTimeout(initListener, 1500);
-
-    // Fallback: auto-transition after 62 seconds (covers most Shorts)
-    const fallback = setTimeout(fireEnd, 62000);
-
-    return () => {
-      window.removeEventListener("message", handler);
-      clearTimeout(initTimer);
-      clearTimeout(fallback);
-    };
+    const timer = setTimeout(fireEnd, 13000);
+    return () => clearTimeout(timer);
   }, [fireEnd]);
 
   return (

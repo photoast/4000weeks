@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch(`/api/users/${domainKey}`)
@@ -45,10 +46,13 @@ export default function DashboardPage() {
     const url = window.location.href;
 
     if (navigator.share) {
-      await navigator.share({ title: "4000 WEEKS", text, url });
+      try {
+        await navigator.share({ title: "4000 WEEKS", text, url });
+      } catch {}
     } else {
       await navigator.clipboard.writeText(`${text}\n${url}`);
-      alert("링크가 복사되었습니다!");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -68,7 +72,7 @@ export default function DashboardPage() {
 
   if (error || !user) {
     return (
-      <div className="h-screen-safe bg-black flex flex-col items-center justify-center gap-6">
+      <div className="h-screen-safe bg-black flex flex-col items-center justify-center gap-6 px-8">
         <p className="text-white/40 text-sm">존재하지 않는 페이지입니다.</p>
         <Link
           href="/"
@@ -83,23 +87,31 @@ export default function DashboardPage() {
   const { currentWeek, totalWeeks } = getWeekInfo(user.birthdate);
 
   return (
-    <div className="h-screen-safe bg-black flex flex-col relative">
+    <div className="h-screen-safe bg-black flex flex-col relative max-w-lg mx-auto">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="flex items-center justify-between px-5 pt-4 pb-2 z-10"
+        className="flex items-center justify-between px-5 pt-5 pb-2 z-10"
       >
-        <Link href="/" className="text-white/40 text-xs tracking-[0.3em] font-bold hover:text-white/70 transition-colors">
+        <Link href="/" className="text-white/30 text-[11px] tracking-[0.3em] font-bold hover:text-white/60 transition-colors">
           4000WEEKS
         </Link>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={handleShare}
-          className="text-white/40 text-xs tracking-widest hover:text-white/70 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] transition-colors"
         >
-          SHARE
-        </button>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/60">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
+          <span className="text-white/60 text-[12px] tracking-wide">
+            {copied ? "복사됨!" : "공유하기"}
+          </span>
+        </motion.button>
       </motion.header>
 
       {/* Title */}
@@ -122,7 +134,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.7, duration: 1 }}
-        className="flex-1 min-h-0 px-2"
+        className="flex-1 min-h-0 px-3"
       >
         <LifeGrid birthdate={user.birthdate} />
       </motion.div>
@@ -147,11 +159,11 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.5 }}
-        className="px-5 pb-6 z-10"
+        className="px-6 pb-8 z-10"
       >
         <Link
           href="/"
-          className="block w-full py-3 text-center text-white/50 text-xs tracking-widest border border-white/10 hover:border-white/30 hover:text-white/80 transition-all"
+          className="block w-full py-3.5 text-center text-white/60 text-[13px] tracking-wide rounded-2xl border border-white/10 hover:border-white/25 hover:text-white/80 transition-all"
         >
           나도 인생 시계 만들기 →
         </Link>

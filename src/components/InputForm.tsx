@@ -113,7 +113,7 @@ export default function InputForm() {
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full max-w-lg mx-auto h-full flex flex-col">
       {/* Progress bar */}
       <div className="w-full h-[2px] bg-white/5">
         <motion.div
@@ -125,21 +125,24 @@ export default function InputForm() {
       </div>
 
       {/* Back button */}
-      <div className="px-5 pt-4 h-12 flex items-center">
+      <div className="px-6 pt-5 h-14 flex items-center">
         {stepIndex > 0 && (
           <motion.button
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             onClick={back}
-            className="text-white/40 text-sm hover:text-white/70 transition-colors"
+            className="text-white/40 text-sm hover:text-white/70 transition-colors flex items-center gap-1"
           >
-            ← 이전
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            이전
           </motion.button>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col justify-center px-8 pb-8">
+      <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 pb-8">
         <AnimatePresence mode="wait">
           {step === "name" && (
             <motion.div
@@ -149,8 +152,8 @@ export default function InputForm() {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
-              <p className="text-white/40 text-[13px] mb-2">Step 1</p>
-              <h2 className="text-[26px] font-bold text-white tracking-tight leading-tight mb-10">
+              <p className="text-white/30 text-[13px] mb-3 tracking-wider">1 / 3</p>
+              <h2 className="text-[24px] font-bold text-white tracking-tight leading-snug mb-10">
                 이름을 알려주세요
               </h2>
               <input
@@ -160,7 +163,7 @@ export default function InputForm() {
                 onChange={(e) => handleUsernameChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="홍길동"
-                className="w-full bg-transparent text-[22px] text-white placeholder-white/15 focus:outline-none caret-white/60 pb-3 border-b border-white/10 focus:border-white/30 transition-colors"
+                className="w-full bg-white/[0.04] rounded-xl px-5 py-4 text-[18px] text-white placeholder-white/15 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
               />
             </motion.div>
           )}
@@ -173,34 +176,32 @@ export default function InputForm() {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
-              <p className="text-white/40 text-[13px] mb-2">Step 2</p>
-              <h2 className="text-[26px] font-bold text-white tracking-tight leading-tight mb-3">
+              <p className="text-white/30 text-[13px] mb-3 tracking-wider">2 / 3</p>
+              <h2 className="text-[24px] font-bold text-white tracking-tight leading-snug mb-2">
                 고유 주소를 정해주세요
               </h2>
-              <p className="text-white/25 text-[14px] mb-10">
+              <p className="text-white/25 text-[14px] mb-8 leading-relaxed">
                 이 주소로 나만의 인생 시계에 접속할 수 있어요
               </p>
-              <div className="relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={domainKey}
-                  onChange={(e) => handleDomainChange(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="gildong"
-                  className="w-full bg-transparent text-[22px] text-white placeholder-white/15 focus:outline-none caret-white/60 pb-3 border-b border-white/10 focus:border-white/30 transition-colors"
-                />
-              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                value={domainKey}
+                onChange={(e) => handleDomainChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="gildong"
+                className="w-full bg-white/[0.04] rounded-xl px-5 py-4 text-[18px] text-white placeholder-white/15 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+              />
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="mt-4 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]"
+                className="mt-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]"
               >
-                <span className="text-white/25 text-[13px]">
+                <span className="text-white/20 text-[13px]">
                   4000weeks.kro.kr/
                 </span>
-                <span className="text-white/70 text-[13px] font-medium">
+                <span className="text-white/60 text-[13px] font-medium">
                   {domainKey || "..."}
                 </span>
               </motion.div>
@@ -215,11 +216,11 @@ export default function InputForm() {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
-              <p className="text-white/40 text-[13px] mb-2">Step 3</p>
-              <h2 className="text-[26px] font-bold text-white tracking-tight leading-tight mb-3">
+              <p className="text-white/30 text-[13px] mb-3 tracking-wider">3 / 3</p>
+              <h2 className="text-[24px] font-bold text-white tracking-tight leading-snug mb-2">
                 생년월일을 알려주세요
               </h2>
-              <p className="text-white/25 text-[14px] mb-10">
+              <p className="text-white/25 text-[14px] mb-8 leading-relaxed">
                 인생의 몇 번째 주인지 계산할게요
               </p>
               <input
@@ -228,7 +229,7 @@ export default function InputForm() {
                 value={birthdate}
                 onChange={(e) => setBirthdate(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-[22px] text-white focus:outline-none caret-white/60 pb-3 border-b border-white/10 focus:border-white/30 transition-colors"
+                className="w-full bg-white/[0.04] rounded-xl px-5 py-4 text-[18px] text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
               />
             </motion.div>
           )}
@@ -250,12 +251,12 @@ export default function InputForm() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="px-6 pb-10">
+      <div className="px-6 sm:px-10 pb-10">
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={next}
           disabled={loading}
-          className="w-full py-[18px] bg-white text-black font-semibold text-[15px] rounded-2xl hover:bg-white/90 active:bg-white/80 transition-colors disabled:opacity-40"
+          className="w-full py-[16px] bg-white text-black font-semibold text-[15px] rounded-2xl hover:bg-white/90 active:bg-white/80 transition-colors disabled:opacity-40"
         >
           {loading ? (
             <motion.span
