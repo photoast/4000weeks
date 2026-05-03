@@ -29,7 +29,7 @@ export default function VideoPlayer({ onEnd }: VideoPlayerProps) {
   };
 
   useEffect(() => {
-    const timer = setTimeout(fireEnd, 13000);
+    const timer = setTimeout(fireEnd, 14000);
     return () => clearTimeout(timer);
   }, [fireEnd]);
 
