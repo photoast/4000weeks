@@ -7,35 +7,28 @@ interface CountdownProps {
   birthdate: string;
 }
 
-/**
- * 한국 표준시(KST) 기준 이번 주차 마감 시간 계산
- */
-function getTimeUntilEndOfWeek() {
-  const now = new Date(); // 현재 시간 (KST)
+// 1. 함수 정의 부분에서 birthdate 인자 타입을 명시적으로 추가했습니다.
+function getTimeUntilEndOfWeek(birthdate: string) {
+  const birth = new Date(`${birthdate}T00:00:00+09:00`);
+  const now = new Date();
   
-  // 1. 이번 주 일요일 자정(즉, 다음 월요일 00:00:00) 구하기
-  const nextMonday = new Date(now);
-  const day = now.getDay(); // 0(일), 1(월), ..., 6(토)
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const elapsed = now.getTime() - birth.getTime();
   
-  // 오늘이 일요일(0)이면 1일 뒤, 아니면 (8 - 요일번호)일 뒤가 다음 월요일
-  const daysUntilMonday = day === 0 ? 1 : 8 - day;
-  
-  nextMonday.setDate(now.getDate() + daysUntilMonday);
-  nextMonday.setHours(0, 0, 0, 0); // 정확히 월요일 시작 시점(00:00:00)
+  const currentWeek = Math.floor(elapsed / msPerWeek);
+  const endOfThisWeek = new Date(birth.getTime() + (currentWeek + 1) * msPerWeek);
+  const remaining = endOfThisWeek.getTime() - now.getTime();
 
-  // 2. 남은 밀리초 계산
-  const remaining = nextMonday.getTime() - now.getTime();
+  const safeRemaining = Math.max(0, remaining);
 
-  const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+  const days = Math.floor(safeRemaining / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((safeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((safeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((safeRemaining % (1000 * 60)) / 1000);
 
   return { days, hours, minutes, seconds };
 }
-/**
- * 숫자가 위아래로 굴러가는 슬롯머신 스타일의 숫자 컴포넌트
- */
+
 function TickerDigit({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center min-w-[36px]">
@@ -48,7 +41,7 @@ function TickerDigit({ value, label }: { value: number; label: string }) {
             exit={{ y: -25, opacity: 0 }}
             transition={{ 
               duration: 0.4, 
-              ease: [0.23, 1, 0.32, 1] // Apple 스타일의 부드러운 가속도
+              ease: [0.23, 1, 0.32, 1]
             }}
             className="text-3xl font-black text-white tabular-nums block"
           >
@@ -69,6 +62,7 @@ export default function Countdown({ birthdate }: CountdownProps) {
 
   useEffect(() => {
     setMounted(true);
+    // 2. 이제 getTimeUntilEndOfWeek가 인자를 정상적으로 받으므로 에러가 사라집니다.
     const update = () => setTime(getTimeUntilEndOfWeek(birthdate));
     
     update();
@@ -76,7 +70,6 @@ export default function Countdown({ birthdate }: CountdownProps) {
     return () => clearInterval(interval);
   }, [birthdate]);
 
-  // 하이드레이션 오류 방지 (서버와 클라이언트의 시간을 맞춤)
   if (!mounted) return null;
 
   return (
