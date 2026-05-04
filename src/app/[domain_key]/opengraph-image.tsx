@@ -42,7 +42,7 @@ export default async function Image({
   const now = new Date();
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
   const currentWeek = Math.floor((now.getTime() - birth.getTime()) / msPerWeek);
-  const percent = ((currentWeek / 4000) * 100).toFixed(1);
+  const percent = ((currentWeek / 4000) * 100).toFixed(4);
 
   return new ImageResponse(
     (
